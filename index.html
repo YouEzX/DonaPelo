@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dona Pelo</title>
+<style>
+:root{--bg:#fff4f8;--fg:#3b1030;--card:#fff;--acc:#e91e8c;--bar:#f3d3e4;--wall:#ffd3e6;--wall2:#ffc2dc;--f1:#fff;--f2:#f4a6cb;--wood:#b9793f;--mirror:#e9f7ff;--glow:#fff3b0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c0f19;--fg:#ffe6f2;--card:#2c1826;--acc:#ff5cb1;--bar:#4a2a40;--wall:#5b2a4a;--wall2:#4f2141;--f1:#3a2436;--f2:#241322;--wood:#8a5a30;--mirror:#6b5a86;--glow:#ffd98a}}
+:root[data-theme="dark"]{--bg:#1c0f19;--fg:#ffe6f2;--card:#2c1826;--acc:#ff5cb1;--bar:#4a2a40;--wall:#5b2a4a;--wall2:#4f2141;--f1:#3a2436;--f2:#241322;--wood:#8a5a30;--mirror:#6b5a86;--glow:#ffd98a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;overflow-x:hidden}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:clamp(1.4rem,4vw,2.1rem);margin:6px 0 2px;display:flex;align-items:center;justify-content:center;gap:10px}
+h1 svg{width:1.4em;height:1.4em}
+p.sub{margin:0 0 12px;opacity:.8}
+.bar{height:18px;background:var(--bar);border-radius:99px;overflow:hidden;border:2px solid var(--acc)}
+#fill{height:100%;width:0;background:repeating-linear-gradient(45deg,var(--acc) 0 10px,#ff8fc7 10px 20px);transition:width .25s}
+#stats{display:flex;justify-content:space-between;font-weight:700;margin:8px 2px}
+#arena{position:relative;height:clamp(380px,68vh,620px);background:var(--card);border-radius:20px;overflow:hidden;touch-action:manipulation;box-shadow:0 4px 14px #0003;border:4px solid var(--acc)}
+#scene{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%}
+#head{position:absolute;bottom:26px;left:50%;width:clamp(180px,36vmin,290px);transform:translateX(-50%);transition:transform .15s;overflow:visible;z-index:1}
+#head.pop{transform:translateX(-50%) scale(1.1)}
+#label{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;font-weight:700;font-size:.9rem;padding:3px 14px;border-radius:99px;z-index:2;white-space:nowrap}
+.it{position:absolute;top:-70px;padding:6px;cursor:pointer;z-index:3;filter:drop-shadow(0 3px 3px #0004)}
+.it svg{width:clamp(44px,9vmin,58px);height:auto;display:block}
+.pt{position:absolute;z-index:4;font-weight:800;font-size:1.3rem;pointer-events:none;animation:up .8s forwards;text-shadow:0 1px 3px #0006}
+@keyframes up{to{transform:translateY(-50px);opacity:0}}
+#flash{position:absolute;top:0;left:0;right:0;bottom:0;z-index:6;display:none;align-items:center;justify-content:center;background:radial-gradient(circle,#000a,#000e);pointer-events:none}#flash.on{display:flex;animation:fl .8s forwards}#flash b{font-size:clamp(2rem,9vmin,3.6rem);color:#fff;font-style:italic;letter-spacing:2px;text-shadow:3px 3px 0 #e5484d,-3px -3px 0 #000;transform:skew(-8deg)}@keyframes fl{0%{opacity:0;transform:scale(1.5)}20%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0}}
+.msg{position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);padding:20px;gap:14px;font-size:1.1rem}
+.msg.on{display:flex}
+.msg svg{width:76px;height:76px}
+button{font:inherit;font-weight:700;background:var(--acc);color:#fff;border:0;border-radius:99px;padding:12px 26px;cursor:pointer;box-shadow:0 3px 0 #0003}
+button.alt{background:var(--bar);color:var(--fg)}
+.hint{font-size:.9rem;opacity:.75;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span id="logo"></span> Dona pelo a <span id="nm"></span></h1>
+  <p class="sub">Atrapa los mechones que caen. ¡Cuidado con las tijeras!</p>
+  <div id="stats"><span>Pelos: <b id="n">0</b>/100</span><span>Racha: <b id="s">0</b></span><span>Donantes: <b id="d">0</b></span></div>
+  <div class="bar"><div id="fill"></div></div>
+  <div id="arena">
+    <svg id="scene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="wp" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="var(--wall)"/><rect width="12" height="24" fill="var(--wall2)"/></pattern>
+        <pattern id="ck" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="var(--f1)"/><rect width="30" height="30" fill="var(--f2)"/><rect x="30" y="30" width="30" height="30" fill="var(--f2)"/></pattern>
+        <pattern id="pole" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="24" height="24" fill="#fff"/><rect width="8" height="24" fill="#e5484d"/><rect x="8" width="8" height="24" fill="#3d7bff"/></pattern>
+        <clipPath id="pc"><rect x="18" y="130" width="62" height="88" rx="3"/></clipPath>
+        <radialGradient id="gl"><stop offset="0" stop-color="var(--glow)" stop-opacity=".8"/><stop offset="1" stop-color="var(--glow)" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="400" height="600" fill="url(#wp)"/>
+      <rect y="440" width="400" height="160" fill="url(#ck)"/>
+      <rect y="432" width="400" height="10" fill="var(--wood)"/>
+      <ellipse cx="200" cy="215" rx="112" ry="145" fill="#d9a441"/>
+      <ellipse cx="200" cy="215" rx="100" ry="133" fill="var(--mirror)"/>
+      <path d="M140 120l50-30M130 160l90-55" stroke="#fff" stroke-width="10" opacity=".45" stroke-linecap="round"/>
+      <line x1="300" y1="0" x2="300" y2="38" stroke="#555" stroke-width="3"/>
+      <circle cx="300" cy="70" r="60" fill="url(#gl)"/>
+      <path d="M278 38h44l14 28h-72z" fill="#ff7ab8"/><circle cx="300" cy="68" r="7" fill="var(--glow)"/>
+      <rect x="18" y="98" width="96" height="8" rx="2" fill="var(--wood)"/>
+      <rect x="26" y="66" width="16" height="32" rx="4" fill="#5cc8ff"/><rect x="30" y="58" width="8" height="8" rx="2" fill="#e91e8c"/>
+      <rect x="50" y="76" width="18" height="22" rx="4" fill="#b58cff"/><rect x="55" y="68" width="8" height="8" rx="2" fill="#333"/>
+      <rect x="76" y="70" width="14" height="28" rx="4" fill="#ffd166"/><rect x="79" y="62" width="8" height="8" rx="2" fill="#e91e8c"/>
+      <path d="M96 98l6-22 6 22z" fill="#fff" stroke="#999"/>
+      <rect x="14" y="14" width="112" height="34" rx="8" fill="#fff" stroke="#e91e8c" stroke-width="3"/>
+      <text x="70" y="36" text-anchor="middle" font-family="system-ui,Segoe UI,sans-serif" font-size="12" font-weight="800" fill="#e91e8c">SALÓN VICTORIA</text>
+      <rect x="18" y="130" width="62" height="88" rx="3" fill="#15152b" stroke="#e5484d" stroke-width="3"/><circle cx="49" cy="182" r="17" fill="#f7cfa6"/><path d="M30 178l4-22 6 12 5-18 6 16 6-14 4 14 6-8-3 20z" fill="#ff7ab8"/><rect x="30" y="196" width="38" height="6" fill="#1f2a5c"/><text x="49" y="212" text-anchor="middle" font-family="system-ui,Segoe UI,sans-serif" font-size="9" font-weight="800" fill="#fff">ITADORI</text>
+      <image id="pimg" href="itadori.jpg" x="18" y="130" width="62" height="88" preserveAspectRatio="xMidYMid slice" clip-path="url(#pc)"/><rect x="18" y="130" width="62" height="88" rx="3" fill="none" stroke="#e5484d" stroke-width="3"/>
+      <rect x="354" y="230" width="30" height="12" rx="4" fill="#ccc"/><rect x="358" y="242" width="22" height="170" fill="url(#pole)" stroke="#bbb" stroke-width="2"/><rect x="354" y="412" width="30" height="12" rx="4" fill="#ccc"/><circle cx="369" cy="224" r="9" fill="#e5484d"/>
+      <rect x="22" y="392" width="46" height="42" rx="6" fill="#c8643c"/>
+      <path d="M45 392C30 360 20 350 12 340M45 392C45 355 45 340 45 322M45 392C60 360 70 350 80 338" stroke="#3aa655" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <rect x="290" y="470" width="90" height="10" rx="4" fill="var(--wood)" opacity=".5"/>
+    </svg>
+    <svg id="head" viewBox="-50 0 300 270" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="140" width="120" height="125" rx="26" fill="#a3245f"/>
+      <path d="M42 170Q100 148 158 170L192 264H8Z" fill="#1f2a5c"/><ellipse cx="100" cy="170" rx="50" ry="17" fill="#d63a3a"/><path d="M100 180V264" stroke="#c9cfe8" stroke-width="3"/><circle cx="100" cy="205" r="4" fill="#e6b93a"/><circle cx="100" cy="232" r="4" fill="#e6b93a"/>
+      <g id="back"></g>
+      <circle cx="100" cy="110" r="55" fill="#f7cfa6" stroke="#c99a70" stroke-width="3"/>
+      <circle cx="72" cy="125" r="8" fill="#f4a29a" opacity=".6"/><circle cx="128" cy="125" r="8" fill="#f4a29a" opacity=".6"/>
+      <circle cx="82" cy="105" r="5" fill="#222"/><circle cx="118" cy="105" r="5" fill="#222"/>
+      <path id="mouth" d="M82 148 Q100 136 118 148" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <g id="front"></g>
+    </svg>
+    <div id="label">Calva total</div>
+    <div id="flash"><b>BLACK FLASH!</b></div>
+    <div id="start" class="msg on">
+      <span id="ic1"></span>
+      <div><b id="nm2"></b> está calva y necesita tu ayuda.<br>Cada pelito cuenta.</div>
+      <button id="go">Empezar a donar</button>
+    </div>
+    <div id="win" class="msg">
+      <svg viewBox="0 0 48 48"><path d="M6 38l-2-24 13 10 7-17 7 17 13-10-2 24z" fill="#ffc83d" stroke="#c98f00" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="12" r="3" fill="#e91e8c"/></svg>
+      <div><b>¡MISIÓN CUMPLIDA!</b><br>Victoria ya tiene melena de Rapunzel.<br>Gracias por tu donación.</div>
+      <button id="share">Compartir el logro</button>
+      <button id="again" class="alt">Jugar otra vez</button>
+    </div>
+  </div>
+  <div class="hint">Toca (o haz clic en) mechones, peines y shampoo para donar. Los tintes le cambian el color. 5 seguidos = BLACK FLASH. Cuidado con las tijeras y el dedo maldito.</div>
+  <div style="margin-top:10px"><button class="alt" id="pick">Poner foto en el póster</button><input type="file" id="file" accept="image/*" hidden></div>
+</div>
+<script>
+var NAME = "Victoria"; // <- cambia aquí el nombre
+var labels=["Calva total","Pelusa de durazno","Flequillo en construcción","Melena decente","Nivel Itadori","Rapunzel"];
+var cols=["#3b2314","#5a3620","#7a4a2a","#2a170d"];
+function ic(k,c){
+  var s='<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">';
+  if(k=="lock")s+='<path d="M24 4c-8 6-10 16-8 26 1 5-1 9-4 12 8 2 16-2 18-10 2-9 0-20-6-28z" fill="#7a4a2a"/><path d="M24 8c-4 8-4 18-2 30" stroke="#b47340" stroke-width="2" fill="none"/><rect x="13" y="22" width="22" height="6" rx="3" fill="#e91e8c"/>';
+  if(k=="comb"){s+='<rect x="3" y="12" width="42" height="11" rx="4" fill="#ff5fae"/>';for(var i=0;i<8;i++)s+='<rect x="'+(5+i*5)+'" y="23" width="3" height="14" rx="1.5" fill="#ff5fae"/>'}
+  if(k=="bottle")s+='<rect x="14" y="14" width="20" height="30" rx="5" fill="#3fb6ff"/><rect x="19" y="4" width="10" height="10" rx="2" fill="#e91e8c"/><rect x="17" y="24" width="14" height="10" rx="2" fill="#fff" opacity=".85"/>';
+  if(k=="scis")s+='<path d="M10 4l18 24M38 4L20 28" stroke="#cfd6df" stroke-width="5" stroke-linecap="round"/><circle cx="13" cy="39" r="6" fill="none" stroke="#e5484d" stroke-width="4"/><circle cx="35" cy="39" r="6" fill="none" stroke="#e5484d" stroke-width="4"/><circle cx="24" cy="24" r="2.5" fill="#666"/>';
+  if(k=='dye')s+='<rect x="14" y="16" width="20" height="28" rx="5" fill="'+c+'"/><rect x="19" y="6" width="10" height="10" rx="2" fill="#333"/><path d="M24 22c-4 5-5 8-5 10a5 5 0 0010 0c0-2-1-5-5-10z" fill="#fff" opacity=".9"/>';
+  if(k=='finger')s+='<rect x="17" y="6" width="14" height="38" rx="7" fill="#7a5c78"/><ellipse cx="24" cy="12" rx="4" ry="3" fill="#2c1a33"/><path d="M18 22h12M18 28h12M18 34h12" stroke="#4b3050" stroke-width="2"/><rect x="17" y="40" width="14" height="5" rx="2" fill="#a33"/>';
+  return s+'</svg>';
+}
+var dyes=[{n:"rosa",c:"#ff4fa3"},{n:"azul",c:"#2f9bff"},{n:"morado",c:"#9b5cff"},{n:"menta",c:"#2fd6a5"}],scol=[],dyeColor=null,streak=0;
+var good=["lock","comb","bottle","lock"],hairs=0,donors=0,items=[],running=false,last=0,acc=0;
+var $=function(i){return document.getElementById(i)},arena=$("arena");
+$("nm").textContent=NAME;$("nm2").textContent=NAME;$("logo").innerHTML=ic("scis");$("ic1").innerHTML=ic("scis");
+function fr(x){return x-Math.floor(x)}
+function draw(n){
+  var b="",f="";
+  for(var i=0;i<n;i++){
+    var r1=fr(Math.sin(i*12.9898)*43758.5453),r2=fr(Math.sin(i*78.233)*12345.6789);
+    var a=Math.PI*(0.95+1.1*r1),dx=Math.cos(a),dy=Math.sin(a);
+    var x0=100+55*dx,y0=110+55*dy,len=8+n*0.5*(0.6+r2*0.8);
+    var droop=n*n/10000*90*(0.6+r2*0.8);
+    var x1=x0+dx*len,y1=y0+dy*len+droop,cx=x0+dx*len*1.1,cy=y0+dy*len*1.1;
+    b+='<path d="M'+x0.toFixed(1)+' '+y0.toFixed(1)+' Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+x1.toFixed(1)+' '+y1.toFixed(1)+'" stroke="'+(scol[i]||cols[i%4])+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  }
+  var k=Math.max(0,Math.floor((n-30)/2));
+  for(var j=0;j<k;j++){
+    var q=fr(Math.sin(j*39.346)*9301.7),x=62+q*76,y=60+Math.abs(x-100)*0.25;
+    f+='<path d="M'+x.toFixed(1)+' '+y.toFixed(1)+' q'+((q-.5)*10).toFixed(1)+' 14 '+((q-.5)*16).toFixed(1)+' '+(18+n*0.15).toFixed(1)+'" stroke="'+(scol[j]||cols[j%4])+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  }
+  $("back").innerHTML=b;$("front").innerHTML=f;
+  $("mouth").setAttribute("d",n<20?"M82 148 Q100 136 118 148":"M82 140 Q100 165 118 140");
+}
+function ui(){
+  $("n").textContent=hairs;$("d").textContent=donors;$("s").textContent=streak;$("fill").style.width=hairs+"%";
+  $("label").textContent=labels[Math.min(5,Math.floor(hairs/20))];draw(hairs);
+}
+function pop(){var h=$("head");h.classList.add("pop");setTimeout(function(){h.classList.remove("pop")},150)}
+function pt(x,y,t,c){var p=document.createElement("div");p.className="pt";p.textContent=t;p.style.left=x+"px";p.style.top=y+"px";p.style.color=c;arena.appendChild(p);setTimeout(function(){p.remove()},800)}
+function flash(){var f=$("flash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on");if(navigator.vibrate)navigator.vibrate([60,40,60])}
+function spawn(){
+  var r=Math.random(),type=r<0.15?"scis":r<0.22?"finger":r<0.4?"dye":good[Math.floor(Math.random()*good.length)];
+  var dc=type=="dye"?dyes[Math.floor(Math.random()*dyes.length)]:null,el=document.createElement("div");
+  el.className="it";el.innerHTML=ic(type,dc&&dc.c);
+  var x=Math.random()*(arena.clientWidth-80);el.style.left=x+"px";
+  var o={el:el,y:-70,v:1.6+Math.random()*2+hairs/40};
+  el.addEventListener("pointerdown",function(e){
+    e.preventDefault();if(!running||o.dead)return;o.dead=true;el.remove();
+    var old=hairs;
+    if(type=="scis"||type=="finger"){
+      hairs=Math.max(0,hairs-(type=="scis"?10:15));streak=0;
+      pt(x,o.y,type=="scis"?"-10":"¡Sukuna! -15","#ff4d4d");if(navigator.vibrate)navigator.vibrate(80);
+    }else{
+      hairs=Math.min(100,hairs+5);donors++;streak++;
+      if(dc){for(var i=0;i<old;i++)if(i%2==0)scol[i]=dc.c;dyeColor=dc.c;pt(x,o.y,"Tinte "+dc.n+"!",dc.c)}
+      else pt(x,o.y,"+5","#ffd23f");
+      if(streak%5==0){hairs=Math.min(100,hairs+10);flash()}
+    }
+    for(var k=old;k<hairs;k++)scol[k]=dyeColor;
+    pop();ui();if(hairs>=100)finish();
+  });
+  arena.appendChild(el);items.push(o);
+}
+function loop(t){
+  if(!running)return;
+  var dt=Math.min(40,t-last)/16;last=t;acc+=dt;
+  if(acc>40){acc=0;spawn()}
+  var H=arena.clientHeight;
+  items=items.filter(function(o){
+    if(o.dead)return false;
+    o.y+=o.v*dt;o.el.style.top=o.y+"px";
+    if(o.y>H){o.el.remove();return false}
+    return true;
+  });
+  requestAnimationFrame(loop);
+}
+function clr(){items.forEach(function(o){o.el.remove()});items=[]}
+function begin(){
+  hairs=0;donors=0;streak=0;scol=[];dyeColor=null;acc=40;clr();ui();
+  $("start").classList.remove("on");$("win").classList.remove("on");
+  running=true;last=performance.now();requestAnimationFrame(loop);
+}
+function finish(){running=false;clr();$("win").classList.add("on");if(navigator.vibrate)navigator.vibrate([100,50,100])}
+$("go").onclick=begin;$("again").onclick=begin;
+$("share").onclick=function(){
+  var txt="Acabo de donarle pelo a "+NAME+". ¡Ya tiene melena de Rapunzel! Dona tú también.";
+  if(navigator.share){navigator.share({title:"Dona pelo",text:txt,url:location.href}).catch(function(){})}
+  else{try{navigator.clipboard.writeText(txt+" "+location.href);$("share").textContent="¡Copiado!"}catch(e){}}
+};
+$("pick").onclick=function(){$("file").click()};
+$("file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=248;c.height=352;var x=c.getContext("2d"),k=Math.max(248/im.width,352/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,(248-w)/2,(352-h)/2,w,h);var u=c.toDataURL("image/jpeg",.85);$("pimg").setAttribute("href",u);try{localStorage.setItem("poster",u)}catch(e){}};im.src=r.result};r.readAsDataURL(f)};
+try{var sp=localStorage.getItem("poster");if(sp)$("pimg").setAttribute("href",sp)}catch(e){}
+ui();
+</script>
+</body>
+</html>
